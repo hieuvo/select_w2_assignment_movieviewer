@@ -46,9 +46,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
     
+    var lastInjection = NSDate()
+    
     func injected() {
-        print ("injected in app delegate")
-        setupTabBar()
+        if lastInjection.timeIntervalSinceNow < -2 {
+            lastInjection = NSDate()
+            print ("injected in app delegate")
+            setupTabBar()
+        }
     }
 
     func setTheme() {

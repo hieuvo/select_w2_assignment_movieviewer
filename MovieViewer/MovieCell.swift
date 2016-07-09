@@ -11,28 +11,65 @@ import SteviaLayout
 
 class MovieCell: UITableViewCell {
     
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var overviewLabel: UILabel!
-    @IBOutlet weak var posterView: UIImageView!
+    var titleLabel = UILabel()
+    var overviewLabel = UILabel()
+    var posterView = UIImageView()
+    var rightView = UIView()
     
     var movie: Movie? = nil
     
-    override func awakeFromNib() {
-        super.awakeFromNib()
+    required init?(coder aDecoder: NSCoder) { super.init(coder: aDecoder)}
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        sv(
+            posterView,
+            rightView.sv(    
+                titleLabel,
+                overviewLabel
+            )
+        )
+
+        titleLabel.numberOfLines = 1
+        titleLabel.textAlignment = .Left
+        titleLabel.font = UIFont.boldSystemFontOfSize(17)
+        
+        overviewLabel.numberOfLines = 0
+        overviewLabel.sizeToFit()
+        overviewLabel.textAlignment = .Left
+        overviewLabel.font = overviewLabel.font.fontWithSize(15)
+        overviewLabel.height(100)
         
         posterView.layer.cornerRadius = 5
         posterView.clipsToBounds = true
         
-        render()
+        layout(
+            10,
+            |-10-posterView-5-rightView-|
+        )
+        
+        rightView.layout(
+            0,
+            |-5-titleLabel-|,
+            |-5-overviewLabel-|,
+            5
+        )
+        
+        posterView.width(100).height(130)
+        posterView.contentMode = .ScaleAspectFill
+    }
+    
+    override func awakeFromNib() {
+        print("awake from nib")
+        super.awakeFromNib()
     }
     
     func injected() {
-        print ("injected from moviecell")
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         appDelegate.injected()
     }
     
-    func render() {
+    func loadContentFromMovieData() {
         if let movie = movie {
             titleLabel.text = movie.title!
             overviewLabel.text = movie.overview
@@ -53,13 +90,13 @@ class MovieCell: UITableViewCell {
                 }, failure: { (request, response, error) in
                     debugPrint(error.localizedDescription)
             })
-            
-            setTheme()
         }
     }
     
     func setData(movie: Movie) {
         self.movie = movie
+        loadContentFromMovieData()
+        setTheme()
     }
     
     func setTheme() { 

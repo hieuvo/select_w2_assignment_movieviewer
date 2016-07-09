@@ -57,16 +57,9 @@ class MoviesViewController: UIViewController {
     // Called after the controller's view is loaded into memory
     override func viewDidLoad() {
         super.viewDidLoad()
-        render()
-    }
-    
-    func injected() {
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        appDelegate.injected()
-    }
-    
-    func render()
-    {
+        
+        tableView.registerClass(MovieCell.self, forCellReuseIdentifier: "MovieCell")
+        
         // set delegate
         tableView.dataSource = self
         tableView.delegate = self
@@ -82,6 +75,11 @@ class MoviesViewController: UIViewController {
         
         // load data to view
         loadMovies()
+    }
+    
+    func injected() {
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        appDelegate.injected()
     }
     
     // In a storyboard-based application, you will often want to do a little preparation before navigation
@@ -128,7 +126,6 @@ class MoviesViewController: UIViewController {
     }
     
     func hideError() {
-        
         errorView.hidden = true
     }
     
@@ -249,10 +246,9 @@ extension MoviesViewController: UITableViewDataSource {
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCellWithIdentifier("MovieCell", forIndexPath: indexPath) as! MovieCell
-//        let cell = MovieCell()
         let movie = filteredMovies![indexPath.row]
         cell.setData(movie)
-        cell.render()
+//        cell.render()
         
         return cell
     }
