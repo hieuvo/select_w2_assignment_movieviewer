@@ -1,0 +1,2 @@
+/Users/LAZHCM10329/Library/Developer/Xcode/DerivedData/MovieViewer-hehfnwiwdbsdndbqdsjbdkgesqfy/Build/Products/Debug-iphonesimulator/MovieViewer.app
+

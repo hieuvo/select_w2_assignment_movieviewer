@@ -16,7 +16,6 @@ enum MoviesViewMode {
 }
 
 enum DisplayMode {
-    
     case Grid, List
 }
 
@@ -35,16 +34,17 @@ class MoviesViewController: UIViewController {
     var refreshControlGrid: UIRefreshControl!
     var searchBar = UISearchBar()
     var defaultNavigationTitleView: UIView?
+    
     var movies: [Movie]? {
         didSet {
             
             filteredMovies = movies
         }
     }
+    
     var filteredMovies: [Movie]?
     var viewMode: MoviesViewMode = .NowPlaying
     var endPointUrl: String {
-        
         switch viewMode {
         case .TopRated:
             return TMDBClient.MovieTopRated
@@ -52,12 +52,21 @@ class MoviesViewController: UIViewController {
             return TMDBClient.MovieNowPlaying
         }
     }
-    var displayMode = DisplayMode.Grid
+    var displayMode = DisplayMode.List
     
     // Called after the controller's view is loaded into memory
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        render()
+    }
+    
+    func injected() {
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        appDelegate.injected()
+    }
+    
+    func render()
+    {
         // set delegate
         tableView.dataSource = self
         tableView.delegate = self
@@ -240,9 +249,10 @@ extension MoviesViewController: UITableViewDataSource {
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCellWithIdentifier("MovieCell", forIndexPath: indexPath) as! MovieCell
+//        let cell = MovieCell()
         let movie = filteredMovies![indexPath.row]
         cell.setData(movie)
-        cell.setTheme()
+        cell.render()
         
         return cell
     }

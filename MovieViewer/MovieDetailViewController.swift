@@ -42,14 +42,13 @@ class MovieDetailViewController: UIViewController {
         let detailViewHeight = overviewLabel.frame.origin.y + overviewLabel.bounds.height
         let contentViewHeight = screenSize.height + detailViewHeight - 200
         
-        detailViewHeightConstrain.constant = detailViewHeight
+//        detailViewHeightConstrain.constant = detailViewHeight
         contentViewHeightConstrain.constant = contentViewHeight
         
         self.view.layoutIfNeeded()
     }
     
     override func viewWillLayoutSubviews() {
-        
         setScrollViewContentSize()
     }
 }

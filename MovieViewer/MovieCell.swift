@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SteviaLayout
 
 class MovieCell: UITableViewCell {
     
@@ -14,40 +15,54 @@ class MovieCell: UITableViewCell {
     @IBOutlet weak var overviewLabel: UILabel!
     @IBOutlet weak var posterView: UIImageView!
     
+    var movie: Movie? = nil
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         
         posterView.layer.cornerRadius = 5
         posterView.clipsToBounds = true
-    }
-
-    func setData(movie: Movie) {
         
-        titleLabel.text = movie.title
-        overviewLabel.text = movie.overview
-        
-        guard (movie.posterPath != nil) else { return }
-        
-        let posterUrl = NSURL(string: TMDBClient.BaseImageW154Url + movie.posterPath!)
-        let request = NSURLRequest(URL: posterUrl!)
-        posterView.setImageWithURLRequest(request, placeholderImage: nil, success: { (request, response, image) in
-            
-            // image come frome cache
-            if response == nil {
-                self.posterView.image = image
-            // image come frome network
-            } else {
-                self.posterView.setImageWithFadeIn(image)
-            }
-        }, failure: { (request, response, error) in
-            
-            // process error here
-            debugPrint(error.localizedDescription)
-        })
+        render()
     }
     
-    func setTheme() {
-        
+    func injected() {
+        print ("injected from moviecell")
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        appDelegate.injected()
+    }
+    
+    func render() {
+        if let movie = movie {
+            titleLabel.text = movie.title!
+            overviewLabel.text = movie.overview
+            
+            guard (movie.posterPath != nil) else { return }
+            
+            let posterUrl = NSURL(string: TMDBClient.BaseImageW154Url + movie.posterPath!)
+            let request = NSURLRequest(URL: posterUrl!)
+            posterView.setImageWithURLRequest(request, placeholderImage: nil, success: { (request, response, image) in
+                
+                // image come frome cache
+                if response == nil {
+                    self.posterView.image = image
+                    // image come frome network
+                } else {
+                    self.posterView.setImageWithFadeIn(image)
+                }
+                }, failure: { (request, response, error) in
+                    debugPrint(error.localizedDescription)
+            })
+            
+            setTheme()
+        }
+    }
+    
+    func setData(movie: Movie) {
+        self.movie = movie
+    }
+    
+    func setTheme() { 
         titleLabel.textColor = UIColor.whiteColor()
         overviewLabel.textColor = UIColor.whiteColor()
         
