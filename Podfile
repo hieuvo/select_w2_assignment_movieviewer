@@ -9,5 +9,5 @@ target 'MovieViewer' do
   pod 'AFNetworking'
   pod 'MBProgressHUD'
   pod 'SteviaLayout'
-
+  pod 'MGSwipeTableCell'
 end

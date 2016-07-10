@@ -8,8 +8,9 @@
 
 import UIKit
 import SteviaLayout
+import MGSwipeTableCell
 
-class MovieCell: UITableViewCell {
+class MovieCell: MGSwipeTableCell {
     
     var titleLabel = UILabel()
     var overviewLabel = UILabel()
@@ -58,7 +59,7 @@ class MovieCell: UITableViewCell {
         posterView.width(100).height(130)
         posterView.contentMode = .ScaleAspectFill
     }
-    
+  
     override func awakeFromNib() {
         print("awake from nib")
         super.awakeFromNib()
@@ -90,7 +91,30 @@ class MovieCell: UITableViewCell {
                 }, failure: { (request, response, error) in
                     debugPrint(error.localizedDescription)
             })
+            
+            setupRightButtons()
         }
+    }
+    
+    func setupRightButtons() {
+        rightButtons.removeAll()
+        
+        let shareButton = MGSwipeButton(title: "Share",backgroundColor: UIColor.lightGrayColor())
+        shareButton.accessibilityIdentifier = "Share"
+        rightButtons = [shareButton]
+        
+        if movie!.isFavorited == false {
+            let favButton = MGSwipeButton(title: "Favorite", backgroundColor: UIColor.redColor())
+            favButton.accessibilityIdentifier = "Favorite"
+            rightButtons.append(favButton)
+        } else {
+            let favButton = MGSwipeButton(title: "Favorited", backgroundColor: UIColor.redColor())
+            favButton.accessibilityIdentifier = "Favorite"
+            favButton.enabled = false
+            rightButtons.append(favButton)
+        }
+        
+        rightSwipeSettings.transition = MGSwipeTransition.Static
     }
     
     func setData(movie: Movie) {

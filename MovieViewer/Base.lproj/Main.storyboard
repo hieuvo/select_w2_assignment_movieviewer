@@ -30,7 +30,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableViewCellContentView>
                                         <connections>
-                                            <segue destination="Y4j-iS-4df" kind="push" id="8iE-uj-sTz"/>
+                                            <segue destination="Y4j-iS-4df" kind="push" identifier="tableViewSegue" id="8iE-uj-sTz"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
@@ -441,6 +441,6 @@
         <image name="timer" width="24" height="24"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="Cnc-NR-Id6"/>
+        <segue reference="8iE-uj-sTz"/>
     </inferredMetricsTieBreakers>
 </document>

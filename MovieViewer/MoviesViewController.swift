@@ -9,6 +9,7 @@
 import UIKit
 import AFNetworking
 import MBProgressHUD
+import MGSwipeTableCell
 
 enum MoviesViewMode {
     
@@ -258,6 +259,7 @@ extension MoviesViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCellWithIdentifier("MovieCell", forIndexPath: indexPath) as! MovieCell
         let movie = filteredMovies![indexPath.row]
         cell.setData(movie)
+        cell.delegate = self
         
         return cell
     }
@@ -267,6 +269,8 @@ extension MoviesViewController: UITableViewDelegate {
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        let cell = tableView.cellForRowAtIndexPath(indexPath)
+        performSegueWithIdentifier("tableViewSegue", sender: cell)
     }
 }
 
@@ -329,5 +333,41 @@ extension MoviesViewController: FiltersViewControllerDelegate {
     func inject(vc: FiltersViewController) {
         vc.dismissViewControllerAnimated(true, completion: nil)
         onFilters()
+    }
+}
+
+extension MoviesViewController: MGSwipeTableCellDelegate {
+    func swipeTableCell(cell: MGSwipeTableCell!, tappedButtonAtIndex index: Int, direction: MGSwipeDirection, fromExpansion: Bool) -> Bool {
+        
+        let cell = cell as! MovieCell
+        cell.hideSwipeAnimated(true)
+        guard direction == .RightToLeft else { return false }
+        
+        let swipeButton = cell.rightButtons[index]
+
+        let swipeButtonIdentifier: String = swipeButton.accessibilityIdentifier!!
+        
+        switch swipeButtonIdentifier {
+        case "Share":
+            print ("clicked share")
+            let shareOptions = UIAlertController(title: "Share this movie", message: "where do you want to share?", preferredStyle: .ActionSheet)
+            
+            let twitterOption = UIAlertAction(title: "Share on Twitter", style: .Default, handler: nil)
+            let fbOption = UIAlertAction(title: "Share on Facebook", style: .Default, handler: nil)
+            let doneOption = UIAlertAction(title: "Done", style: .Cancel, handler: nil)
+            
+            shareOptions.addAction(twitterOption)
+            shareOptions.addAction(fbOption)
+            shareOptions.addAction(doneOption)
+            navigationController?.presentViewController(shareOptions, animated: false, completion: nil)
+        case "Favorite":
+            print ("clicked favorite")
+            cell.movie?.isFavorited = true
+            cell.setupRightButtons()
+        default:
+            print ("default")
+        }
+        
+        return true
     }
 }
