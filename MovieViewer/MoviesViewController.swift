@@ -37,7 +37,6 @@ class MoviesViewController: UIViewController {
     
     var movies: [Movie]? {
         didSet {
-            
             filteredMovies = movies
         }
     }
@@ -54,7 +53,13 @@ class MoviesViewController: UIViewController {
     }
     var displayMode = DisplayMode.List
     
-    // Called after the controller's view is loaded into memory
+    var settings: [String: String] = [:]
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        loadMovies()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -72,9 +77,6 @@ class MoviesViewController: UIViewController {
         setDisplayMode(displayMode)
         defaultNavigationTitleView = navigationItem.titleView
         setTheme()
-        
-        // load data to view
-        loadMovies()
     }
     
     func injected() {
@@ -82,10 +84,9 @@ class MoviesViewController: UIViewController {
         appDelegate.injected()
     }
     
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        
         var indexPath: NSIndexPath?
+        
         if let cell = sender as? UITableViewCell {
             indexPath = tableView.indexPathForCell(cell)
         } else if let cell = sender as? UICollectionViewCell {
@@ -110,11 +111,14 @@ class MoviesViewController: UIViewController {
     }
     
     @IBAction func onTapSearchButton(sender: AnyObject) {
-        
         if(searchBarButton.title == "Search") {
             searchBarButton.title = "Cancel"
             navigationItem.titleView = searchBar
             searchBar.becomeFirstResponder()
+            let filtersButton = UIBarButtonItem(title: "Filters", style: .Plain, target: self, action: #selector(onFilters))
+            
+            navigationItem.rightBarButtonItems = [filtersButton, searchBarButton]
+            
         } else {
             searchBarButton.title = "Search"
             searchBar.text = ""
@@ -122,7 +126,23 @@ class MoviesViewController: UIViewController {
             filteredMovies = movies
             self.searchBar(searchBar, textDidChange: "")
             searchBar.resignFirstResponder()
+            navigationItem.rightBarButtonItems = [searchBarButton]
         }
+    }
+    
+    func onFilters(sender: UIBarButtonItem? = nil) {
+        print("clicked filters button")
+        let filtersVC: FiltersViewController = createFiltersVC()
+        filtersVC.delegate = self
+        self.navigationController?.pushViewController(filtersVC, animated: false)
+    }
+    
+    func createFiltersVC() -> FiltersViewController {
+        // make instance from xib file, but it doesn't support static cell
+        // return FiltersViewController(nibName: "FiltersViewController", bundle: nil)
+        
+        // make instance from storyboard
+        return FiltersViewController.instantiateFromStoryboard(UIStoryboard.mainStoryboard())
     }
     
     func hideError() {
@@ -130,13 +150,11 @@ class MoviesViewController: UIViewController {
     }
     
     func showError(error: NSError) {
-        
         errorLabel.text = error.localizedDescription
         errorView.hidden = false
     }
     
     func setupRefreshControls() {
-        
         refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(onRefresh), forControlEvents: .ValueChanged)
         tableView.insertSubview(refreshControl, atIndex: 0)
@@ -151,37 +169,36 @@ class MoviesViewController: UIViewController {
     }
     
     func onRefresh() {
-        
         loadMovies()
     }
     
-    func loadMovies() {
+    func loadMovieComplete(movies: [Movie]?, error: NSError?) {
+        MBProgressHUD.hideHUDForView(self.view, animated: true)
+        endRefreshing()
         
+        guard error == nil else {
+            self.movies?.removeAll()
+            reloadData()
+            showError(error!)
+            return
+        }
+        
+        self.movies = movies
+        reloadData()
+    }
+    
+    func loadMovies() {
         hideError()
-        // Display HUD right before the request is made
         MBProgressHUD.showHUDAddedTo(self.view, animated: true)
-        // make network request
-        TMDBClient.fetchMovies(endPointUrl, page: nil, language: nil, complete: {(movies: [Movie]?, error: NSError?) -> Void in
-            
-            // Hide HUD once the network request comes back (must be done on main UI thread)
-            MBProgressHUD.hideHUDForView(self.view, animated: true)
-            // end refreshing
-            self.endRefreshing()
-            
-            guard error == nil else {
-                self.movies?.removeAll()
-                self.reloadData()
-                self.showError(error!)
-                return
-            }
-            
-            self.movies = movies
-            self.reloadData()
-        })
+        
+        if settings == [:] {
+            TMDBClient.fetchMovies(endPointUrl, page: nil, language: nil, complete: loadMovieComplete)
+        } else {
+            TMDBClient.fetchMovies(settings, page: nil, language: nil, complete: loadMovieComplete)
+        }   
     }
     
     func setDisplayMode(mode: DisplayMode) {
-        
         displayMode = mode
         
         switch mode {
@@ -197,13 +214,11 @@ class MoviesViewController: UIViewController {
     }
     
     func endRefreshing() {
-        
         self.refreshControl.endRefreshing()
         self.refreshControlGrid.endRefreshing()
     }
     
     func reloadData() {
-        
         switch displayMode {
         case .Grid:
             collectionView.reloadData()
@@ -213,7 +228,6 @@ class MoviesViewController: UIViewController {
     }
     
     func setTheme() {
-        
         tableView.backgroundColor = UIColor.blackColor()
         collectionView.backgroundColor = UIColor.blackColor()
         
@@ -236,43 +250,32 @@ class MoviesViewController: UIViewController {
 
 extension MoviesViewController: UITableViewDataSource {
     
-    // Tells the data source to return the number of rows in a given section of a table view.
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    
         return filteredMovies?.count ?? 0
     }
     
-    // Asks the data source for a cell to insert in a particular location of the table view.
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        
         let cell = tableView.dequeueReusableCellWithIdentifier("MovieCell", forIndexPath: indexPath) as! MovieCell
         let movie = filteredMovies![indexPath.row]
         cell.setData(movie)
-//        cell.render()
         
         return cell
     }
-    
 }
 
 extension MoviesViewController: UITableViewDelegate {
     
-    // Tells the delegate that the specified row is now selected.
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
 }
 
 extension MoviesViewController: UICollectionViewDataSource {
     
-    // Asks your data source object for the number of items in the specified section.
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        
         return filteredMovies?.count ?? 0
     }
     
-    // Asks your data source object for the cell that corresponds to the specified item in the collection view.
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
         let gridCell = collectionView.dequeueReusableCellWithReuseIdentifier("MovieCollectionCell", forIndexPath: indexPath) as! MovieCollectionCell
@@ -286,23 +289,18 @@ extension MoviesViewController: UICollectionViewDataSource {
 
 extension MoviesViewController: UICollectionViewDelegateFlowLayout {
     
-    // Asks the delegate for the size of the specified item’s cell.
-    func collectionView(collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                               sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
         
         return CGSize(width: 145, height: 200)
     }
     
     // Asks the delegate for the margins to apply to content in the specified section.
-    func collectionView(collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                               insetForSectionAtIndex section: Int) -> UIEdgeInsets {
+    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAtIndex section: Int) -> UIEdgeInsets {
+        
         return sectionInsets
     }
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        
         collectionView.deselectItemAtIndexPath(indexPath, animated: true)
     }
 }
@@ -310,14 +308,26 @@ extension MoviesViewController: UICollectionViewDelegateFlowLayout {
 extension MoviesViewController: UISearchBarDelegate {
     
     func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
-        
         filteredMovies = searchText.isEmpty ? movies : movies!.filter({ (movie :Movie) -> Bool in
             return movie.title!.rangeOfString(searchText, options: .CaseInsensitiveSearch) != nil
         })
+        
         reloadData()
     }
     
     func searchBarSearchButtonClicked(searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
+    }
+}
+
+extension MoviesViewController: FiltersViewControllerDelegate {
+    
+    func updateSettings(vc: FiltersViewController, settings: [String: String]) {
+        self.settings = settings
+    }
+    
+    func inject(vc: FiltersViewController) {
+        vc.dismissViewControllerAnimated(true, completion: nil)
+        onFilters()
     }
 }

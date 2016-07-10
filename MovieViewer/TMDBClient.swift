@@ -15,11 +15,27 @@ struct TMDBClient {
     static let BaseImageWOriginalUrl = "http://image.tmdb.org/t/p/original"
     static let MovieNowPlaying = "http://api.themoviedb.org/3/movie/now_playing?api_key=\(ApiKey)"
     static let MovieTopRated = "http://api.themoviedb.org/3/movie/top_rated?api_key=\(ApiKey)"
+    static let Discover = "http://api.themoviedb.org/3/discover/movie?api_key=\(ApiKey)"
     
-    // fetch movies from input url
+    static func fetchMovies(settings: [String: String], page: Int?, language: String?, complete: ((movies: [Movie]?, error:NSError?) -> Void) ) {
+        
+        var urlString: String = TMDBClient.Discover
+        for (settingKey, settingValue) in settings {
+            urlString += "&\(settingKey)=\(settingValue)"
+        }
+        
+        let url = NSURL(string: urlString)!
+        self.fetchMovies(url, page: page, language: language, complete: complete)
+    }
+    
     static func fetchMovies(urlString: String, page: Int?, language: String?, complete: ((movies: [Movie]?, error: NSError?) -> Void) ) {
         
         let url = NSURL(string: urlString)!
+        self.fetchMovies(url, page: page, language: language, complete: complete)
+    }
+    
+    static func fetchMovies(url: NSURL, page: Int?, language: String?, complete: ((movies: [Movie]?, error: NSError?) -> Void) ) {
+        
         let request = NSURLRequest(URL: url)
         let session = NSURLSession(
             configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
