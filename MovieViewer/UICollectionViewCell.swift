@@ -10,10 +10,7 @@ import UIKit
 
 extension UICollectionViewCell {
     static var cellIdentifier: String {
-        let classString = NSStringFromClass(self)
-        let components = classString.componentsSeparatedByString(".")
-        assert(components.count > 0, "Failed extract class name from \(classString)")
-        return components.last!
+        return className
     }
     
     class func dequeueReusableCellFromCollectionView(collectionView: UICollectionView, forIndexPath indexPath: NSIndexPath) -> Self {
