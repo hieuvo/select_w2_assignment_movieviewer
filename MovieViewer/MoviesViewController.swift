@@ -62,6 +62,8 @@ class MoviesViewController: UIViewController {
     }
     
     override func viewDidLoad() {
+//        let realm = try! Realm()
+        
         super.viewDidLoad()
         
         tableView.registerClass(MovieCell.self, forCellReuseIdentifier: "MovieCell")
@@ -256,7 +258,7 @@ extension MoviesViewController: UITableViewDataSource {
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("MovieCell", forIndexPath: indexPath) as! MovieCell
+        let cell = MovieCell.dequeueReusableCellFromTableView(tableView, forIndexPath: indexPath)
         let movie = filteredMovies![indexPath.row]
         cell.setData(movie)
         cell.delegate = self
@@ -282,7 +284,7 @@ extension MoviesViewController: UICollectionViewDataSource {
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
-        let gridCell = collectionView.dequeueReusableCellWithReuseIdentifier("MovieCollectionCell", forIndexPath: indexPath) as! MovieCollectionCell
+        let gridCell = MovieCollectionCell.dequeueReusableCellFromCollectionView(collectionView, forIndexPath: indexPath)
         let movie = filteredMovies![indexPath.row]
         gridCell.setData(movie)
         gridCell.setTheme()
