@@ -65,10 +65,6 @@ class MoviesViewController: UIViewController {
     }
     
     override func viewDidLoad() {
-        
-//        FirebaseUserDataService.userFavoriteMovie("hieuvo", movieID: 10)
-        
-        
         super.viewDidLoad()
         
         tableView.registerClass(MovieCell.self, forCellReuseIdentifier: "MovieCell")
@@ -192,7 +188,8 @@ class MoviesViewController: UIViewController {
         }
         
         self.movies = movies
-        FirebaseUserDataService.getUserFavorites("hieuvo") { (userFavorites) in
+
+        FirebaseUserDataService.getUserFavorites(username) { (userFavorites) in
             var dictionaryOfFavorites: [Int: Bool] = [:]
             
             for movieId in userFavorites {
