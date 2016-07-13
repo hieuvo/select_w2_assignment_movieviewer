@@ -10,6 +10,8 @@ import UIKit
 import AFNetworking
 import MBProgressHUD
 import MGSwipeTableCell
+import Firebase
+import FirebaseDatabase
 
 enum MoviesViewMode {
     
@@ -35,6 +37,7 @@ class MoviesViewController: UIViewController {
     var refreshControlGrid: UIRefreshControl!
     var searchBar = UISearchBar()
     var defaultNavigationTitleView: UIView?
+    let username = "hieuvo"
     
     var movies: [Movie]? {
         didSet {
@@ -62,8 +65,6 @@ class MoviesViewController: UIViewController {
     }
     
     override func viewDidLoad() {
-//        let realm = try! Realm()
-        
         super.viewDidLoad()
         
         tableView.registerClass(MovieCell.self, forCellReuseIdentifier: "MovieCell")
@@ -187,6 +188,21 @@ class MoviesViewController: UIViewController {
         }
         
         self.movies = movies
+
+        FirebaseUserDataService.getUserFavorites(username) { (userFavorites) in
+            var dictionaryOfFavorites: [Int: Bool] = [:]
+            
+            for movieId in userFavorites {
+                dictionaryOfFavorites[movieId] = true
+            }
+            
+            for movie in self.movies! {
+                if (dictionaryOfFavorites[movie.id!] != nil) {
+                    movie.isFavorited = true
+                }
+            }
+            self.reloadData()
+        }
         reloadData()
     }
     
@@ -261,6 +277,8 @@ extension MoviesViewController: UITableViewDataSource {
         let cell = MovieCell.dequeueReusableCellFromTableView(tableView, forIndexPath: indexPath)
         let movie = filteredMovies![indexPath.row]
         cell.setData(movie)
+        cell.setupFavorite()
+        cell.setupRightButtons()
         cell.delegate = self
         
         return cell
@@ -364,7 +382,8 @@ extension MoviesViewController: MGSwipeTableCellDelegate {
             navigationController?.presentViewController(shareOptions, animated: false, completion: nil)
         case "Favorite":
             print ("clicked favorite")
-            cell.movie?.isFavorited = true
+            FirebaseUserDataService.userFavoriteMovie(username, movieID: (cell.movie?.id)!)
+            cell.didFavorite()
             cell.setupRightButtons()
         default:
             print ("default")

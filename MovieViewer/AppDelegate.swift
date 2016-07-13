@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Firebase
+import FirebaseDatabase
 
 let themeColor = UIColor.colorWithRGBHex(0xFFCC00)
 
@@ -17,10 +19,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
+        setupFirebase()
+        
         setupTabBar()
         setTheme()
         
         return true
+    }
+    
+    func setupFirebase() {
+        FIRApp.configure()
+        FIRDatabase.database().persistenceEnabled = true
     }
 
     func applicationWillResignActive(application: UIApplication) {

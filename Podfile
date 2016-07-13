@@ -10,4 +10,5 @@ target 'MovieViewer' do
   pod 'MBProgressHUD'
   pod 'SteviaLayout'
   pod 'MGSwipeTableCell'
+  pod 'Firebase', '>= 2.5.1'
 end

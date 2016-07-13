@@ -16,6 +16,7 @@ class MovieCell: MGSwipeTableCell {
     var overviewLabel = UILabel()
     var posterView = UIImageView()
     var rightView = UIView()
+    var favImage = UIImageView()
     
     var movie: Movie? = nil
     
@@ -25,11 +26,14 @@ class MovieCell: MGSwipeTableCell {
         
         sv(
             posterView,
-            rightView.sv(    
+            rightView.sv(
+                favImage,
                 titleLabel,
                 overviewLabel
             )
         )
+        
+        favImage.size(20)
 
         titleLabel.numberOfLines = 1
         titleLabel.textAlignment = .Left
@@ -51,6 +55,7 @@ class MovieCell: MGSwipeTableCell {
         
         rightView.layout(
             0,
+            |-favImage|,
             |-5-titleLabel-|,
             |-5-overviewLabel-|,
             5
@@ -96,6 +101,14 @@ class MovieCell: MGSwipeTableCell {
         }
     }
     
+    func setupFavorite() {
+        if movie != nil && movie!.isFavorited {
+            favImage.image = UIImage(named: "favorited")
+        } else {
+            favImage.image = UIImage(named: "favorite")
+        }
+    }
+    
     func setupRightButtons() {
         rightButtons.removeAll()
         
@@ -106,11 +119,6 @@ class MovieCell: MGSwipeTableCell {
         if movie!.isFavorited == false {
             let favButton = MGSwipeButton(title: "Favorite", backgroundColor: UIColor.redColor())
             favButton.accessibilityIdentifier = "Favorite"
-            rightButtons.append(favButton)
-        } else {
-            let favButton = MGSwipeButton(title: "Favorited", backgroundColor: UIColor.redColor())
-            favButton.accessibilityIdentifier = "Favorite"
-            favButton.enabled = false
             rightButtons.append(favButton)
         }
         
@@ -133,5 +141,10 @@ class MovieCell: MGSwipeTableCell {
         let customSelectionView = UIView(frame: frame)
         customSelectionView.backgroundColor = themeColor
         selectedBackgroundView = customSelectionView
+    }
+    
+    func didFavorite() {
+        movie?.isFavorited = true
+        favImage.image = UIImage(named: "favorited")
     }
 }
